@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PJ-ECC | Private Security Server</title>
+    
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <!-- External Libraries (Required for Scanner, QR Gen and Image Save) -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #F36C21;
+            --secondary: #2ECC71;
+            --bg-dark: #020203;
+            --glass: rgba(10, 10, 12, 0.98);
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-dark);
+            color: #fff;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Animated Background Glow */
+        .bg-glow {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(243, 108, 33, 0.05) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        /* Main Container Design */
+        .container {
+            background: var(--glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 35px;
+            padding: 30px 20px;
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 60px 120px rgba(0,0,0,1);
+            text-align: center;
+            position: relative;
+            min-height: 520px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header { margin-top: 10px; }
+        .logo { font-family: 'Orbitron', sans-serif; font-size: 2.8em; font-weight: 900; color: var(--primary); }
+        .tagline { display: block; font-size: 0.65em; letter-spacing: 5px; opacity: 0.4; text-transform: uppercase; margin-bottom: 30px; }
+
+        /* Button Styling */
+        .btn { 
+            width: 100%; 
+            height: 55px; 
+            border-radius: 15px; 
+            border: none; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            cursor: pointer; 
+            margin-top: 15px; 
+            transition: 0.3s; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-decoration: none;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+        .btn-primary { background: var(--primary); color: #000; box-shadow: 0 10px 20px rgba(243, 108, 33, 0.2); }
+        .btn-secondary { background: rgba(255, 255, 255, 0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* Scanner Section */
+        .scanner-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1/1;
+            margin-bottom: 20px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: #000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #reader { width: 100%; height: 100%; }
+
+        /* Holographic Bubble Animation */
+        .dot-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .dot {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 10px var(--primary);
+        }
+
+        @keyframes bubbleIn {
+            0% { transform: translate(var(--startX), var(--startY)) scale(0); opacity: 0; }
+            40% { opacity: 1; }
+            100% { transform: translate(var(--endX), var(--endY)) scale(1.5); opacity: 0; }
+        }
+
+        /* Messaging Boxes */
+        .msg-box {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid #E74C3C;
+            border-radius: 15px;
+            padding: 20px;
+            color: #E74C3C;
+            margin-bottom: 20px;
+        }
+
+        /* Employee Card Design */
+        .verified-card {
+            background: #ffffff;
+            color: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            text-align: left;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            margin-bottom: 25px;
+            position: relative;
+        }
+        .card-top { background: #000; padding: 15px 20px; color: var(--primary); font-family: 'Orbitron', sans-serif; font-weight: 800; border-bottom: 4px solid var(--primary); }
+        .card-body { padding: 25px; }
+        .data-row { margin-bottom: 15px; border-bottom: 1px solid rgba(0,0,0,0.08); }
+        .data-row label { font-size: 0.6em; color: #888; text-transform: uppercase; font-weight: 800; }
+        .data-row p { font-size: 1.1em; font-weight: 900; margin: 2px 0; color: #000; }
+
+        .hidden { display: none !important; }
+        .input-field { width: 100%; padding: 15px; margin-bottom: 12px; border-radius: 12px; background: #000; border: 1px solid #222; color: #fff; box-sizing: border-box; }
+        
+        /* Admin Link Footer */
+        .footer-admin-link {
+            margin-top: auto;
+            padding-top: 20px;
+            opacity: 0.5;
+            font-size: 0.75em;
+            letter-spacing: 2px;
+            cursor: pointer;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        /* Top Back Button */
+        .back-top-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        /* QR Downloader Styling */
+        #qr-download-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            display: inline-block;
+            margin-top: 15px;
+        }
+        
+        #qrcode img, #qrcode canvas {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+
+    <div class="container">
+        <!-- Section: Home Page -->
+        <div id="view-home" style="display: flex; flex-direction: column; height: 100%; flex: 1;">
+            <header>
+                <span class="logo">PJ-ECC</span>
+                <span class="tagline">PRIVATE SERVER ACCESS</span>
+            </header>
+            <button onclick="startScanning()" class="btn btn-primary">OPEN SECURE SCANNER</button>
+            <label for="gallery-input" class="btn btn-primary">
+                <span>SCAN FROM GALLERY</span>
+            </label>
+            <input type="file" id="gallery-input" accept="image/*" class="hidden" onchange="scanFromGallery(event)">
+            
+            <div style="margin-top: 30px; opacity: 0.3; font-size: 0.7em; letter-spacing: 2px;">
+                ENCRYPTED CONNECTION ACTIVE
+            </div>
+
+            <div class="footer-admin-link" onclick="switchView('view-login')">ADMIN SECURE ACCESS</div>
+        </div>
+
+        <!-- Section: Login Screen -->
+        <div id="view-login" class="hidden">
+            <header><span class="logo" style="font-size: 2em;">LOGIN</span></header>
+            <input type="password" id="adminPass" class="input-field" placeholder="Enter Access Key" style="margin-top: 20px;">
+            <button onclick="checkAdmin()" class="btn btn-primary">AUTHENTICATE</button>
+            <button onclick="switchView('view-home')" class="btn btn-secondary">BACK TO HOME</button>
+        </div>
+
+        <!-- Section: Admin Maker Panel -->
+        <div id="view-admin" class="hidden">
+            <button onclick="switchView('view-home')" class="back-top-btn">← BACK</button>
+            <header style="margin-top: 30px;"><span class="logo" style="font-size: 2em;">MAKER</span></header>
+            
+            <div style="margin-top: 20px;">
+                <input type="text" id="mName" class="input-field" placeholder="Full Name">
+                <input type="text" id="mDate" class="input-field" placeholder="Date (DD/MM/YY)">
+                <input type="text" id="mAddr" class="input-field" placeholder="Location">
+                <input type="text" id="mRef" class="input-field" placeholder="Ref ID">
+                <button onclick="generateQR()" class="btn btn-primary">GENERATE SECURE QR</button>
+                
+                <div id="qr-display-section" class="hidden">
+                    <div id="qr-download-container">
+                        <div id="qrcode"></div>
+                    </div>
+                    <button onclick="saveQRToGallery()" class="btn btn-primary" style="background: var(--secondary);">SAVE TO GALLERY</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section: Live Scanner Screen -->
+        <div id="view-scanner" class="hidden">
+            <div class="scanner-container">
+                <div id="reader"></div>
+                <div class="dot-overlay" id="dot-field"></div>
+            </div>
+            <div id="scanner-msg" style="font-size: 0.8em; color: var(--primary); margin-bottom: 10px; opacity: 0.6;">
+                ALGORITHM: BUBBLE_SCAN_V4
+            </div>
+            <button onclick="location.reload()" class="btn btn-secondary">CANCEL SCAN</button>
+        </div>
+
+        <!-- Section: Result Handling -->
+        <div id="view-result" class="hidden">
+            <!-- 1. Success Card -->
+            <div id="res-verified" class="hidden">
+                <div class="verified-card">
+                    <div class="card-top">VERIFIED ACCESS</div>
+                    <div class="card-body">
+                        <div class="data-row"><label>Employee</label><p id="resName"></p></div>
+                        <div class="data-row"><label>Date</label><p id="resDate"></p></div>
+                        <div class="data-row"><label>Location</label><p id="resAddr"></p></div>
+                        <div class="data-row"><label>ID Ref</label><p id="resRef"></p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Invalid QR Message -->
+            <div id="res-invalid" class="hidden">
+                <div class="msg-box">
+                    <h3 style="margin:0;">⚠️ SCAN FAILED</h3>
+                    <p style="font-size: 0.9em; line-height: 1.5;">This QR code is not a PJ-ECC product. We cannot scan this.</p>
+                </div>
+            </div>
+
+            <!-- 3. External Scan Message -->
+            <div id="res-external" class="hidden">
+                <div class="msg-box" style="border-color: var(--primary); color: var(--primary); background: rgba(243,108,33,0.1);">
+                    <h3 style="margin:0;">🛑 SERVER ACCESS ONLY</h3>
+                    <p style="font-size: 0.9em; line-height: 1.5; color: #fff;">
+                        This scan is only authorized within the PJ-ECC Server application. 
+                        To access this server, please contact your PJ Company CEO or CoS.
+                    </p>
+                </div>
+            </div>
+            <button onclick="location.reload()" class="btn btn-primary">RETURN HOME</button>
+        </div>
+    </div>
+
+    <script>
+        let scanner;
+
+        // View Navigator
+        function switchView(id) {
+            document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        // Generate Bubble Effect logic
+        function createBubbleAnimation() {
+            const field = document.getElementById('dot-field');
+            field.innerHTML = '';
+            for (let i = 0; i < 70; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                
+                const startSide = Math.floor(Math.random() * 4);
+                let sx, sy;
+                if(startSide === 0) { sx = Math.random()*140-20+'%'; sy = '-100px'; }
+                else if(startSide === 1) { sx = '140%'; sy = Math.random()*140-20+'%'; }
+                else if(startSide === 2) { sx = Math.random()*140-20+'%'; sy = '140%'; }
+                else { sx = '-100px'; sy = Math.random()*140-20+'%'; }
+
+                const ex = (Math.random()*60+20)+'%';
+                const ey = (Math.random()*60+20)+'%';
+
+                dot.style.setProperty('--startX', sx);
+                dot.style.setProperty('--startY', sy);
+                dot.style.setProperty('--endX', ex);
+                dot.style.setProperty('--endY', ey);
+                
+                dot.style.left = '0'; dot.style.top = '0';
+                dot.style.animation = `bubbleIn ${Math.random()*1.2+0.8}s infinite ease-in-out`;
+                dot.style.animationDelay = Math.random()*2+'s';
+                field.appendChild(dot);
+            }
+        }
+
+        // Scanner Logic
+        async function startScanning() {
+            switchView('view-scanner');
+            createBubbleAnimation();
+            scanner = new Html5Qrcode("reader");
+            try {
+                await scanner.start({ facingMode: "environment" }, { fps: 30 }, (text) => {
+                    document.getElementById('scanner-msg').innerText = "DECRYPTING... PLEASE WAIT";
+                    setTimeout(() => {
+                        scanner.stop().then(() => processScan(text, true));
+                    }, 1800); // 1.8s delay for bubble animation as requested
+                });
+            } catch (err) { alert("Camera Permission Required"); location.reload(); }
+        }
+
+        // Gallery Scan Logic
+        function scanFromGallery(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const tempScanner = new Html5Qrcode("reader");
+            tempScanner.scanFile(file, true)
+                .then(text => processScan(text, true))
+                .catch(err => processScan("invalid", true));
+        }
+
+        // Encryption/Verification Engine
+        function processScan(data, isInternal) {
+            switchView('view-result');
+            document.getElementById('res-verified').classList.add('hidden');
+            document.getElementById('res-invalid').classList.add('hidden');
+            document.getElementById('res-external').classList.add('hidden');
+
+            try {
+                const url = new URL(data);
+                const p = new URLSearchParams(url.search);
+
+                // Check for official PJ-ECC mark
+                if (!p.has('pjecc')) {
+                    document.getElementById('res-invalid').classList.remove('hidden');
+                    return;
+                }
+
+                // Internal vs External Logic
+                if (isInternal) {
+                    document.getElementById('res-verified').classList.remove('hidden');
+                    document.getElementById('resName').innerText = p.get('n');
+                    document.getElementById('resDate').innerText = p.get('d');
+                    document.getElementById('resAddr').innerText = p.get('a');
+                    document.getElementById('resRef').innerText = p.get('r');
+                } else {
+                    document.getElementById('res-external').classList.remove('hidden');
+                }
+            } catch (e) {
+                document.getElementById('res-invalid').classList.remove('hidden');
+            }
+        }
+
+        // Admin Security
+        function checkAdmin() {
+            if(document.getElementById('adminPass').value === "sonu@jeet") {
+                switchView('view-admin');
+                document.getElementById('adminPass').value = "";
+            } else {
+                alert("Incorrect Security Key!");
+            }
+        }
+
+        // QR Code Creator
+        function generateQR() {
+            const n = document.getElementById('mName').value;
+            const d = document.getElementById('mDate').value;
+            const a = document.getElementById('mAddr').value;
+            const r = document.getElementById('mRef').value;
+            
+            if(!n || !r) return alert("All fields are mandatory!");
+
+            const qrd = document.getElementById('qrcode');
+            qrd.innerHTML = "";
+            document.getElementById('qr-display-section').classList.remove('hidden');
+
+            const link = `${window.location.origin}${window.location.pathname}?pjecc=1&n=${encodeURIComponent(n)}&d=${encodeURIComponent(d)}&a=${encodeURIComponent(a)}&r=${encodeURIComponent(r)}`;
+            
+            new QRCode(qrd, {
+                text: link,
+                width: 256,
+                height: 256,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+
+        // Export to Gallery (High Res)
+        function saveQRToGallery() {
+            const qrContainer = document.getElementById('qr-download-container');
+            html2canvas(qrContainer, {
+                scale: 3, // High definition
+                useCORS: true,
+                backgroundColor: "#ffffff"
+            }).then(canvas => {
+                const imgData = canvas.toDataURL("image/png");
+                const link = document.createElement('a');
+                link.download = `PJ-ECC-SECURE-QR-${Date.now()}.png`;
+                link.href = imgData;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }).catch(err => {
+                alert("Download Failed! Take a screenshot or try long-pressing the QR.");
+                console.error(err);
+            });
+        }
+
+        // Auto-detect External Scans on Load
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('pjecc')) {
+                processScan(window.location.href, false);
+            }
+        };
+    </script>
+</body>
+</html>
+
