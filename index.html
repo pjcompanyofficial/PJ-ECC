@@ -2,206 +2,230 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Secure Cyber Scan</title>
+<title>PJ-ECC Cyber Secure</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <style>
-/* ===== BASE ===== */
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0a0a0a;
-  color: orange;
-  overflow: hidden;
+body{
+  margin:0;
+  font-family:Orbitron,Arial;
+  background:#050505;
+  color:#ff6a00;
+  overflow:hidden;
 }
-.light {
-  background: #f5f5f5;
-  color: #111;
+.light{background:#f5f5f5;color:#111}
+.hidden{display:none}
+
+/* HEADER */
+header{
+  display:flex;
+  justify-content:space-between;
+  padding:14px;
+}
+#menuBtn{font-size:26px;cursor:pointer}
+
+/* MENU */
+#menu{
+  position:absolute;
+  top:55px;
+  right:10px;
+  background:#111;
+  border-radius:12px;
+  padding:10px;
+  display:none;
+}
+#menu button{
+  width:100%;
+  margin:6px 0;
 }
 
-/* ===== HEADER ===== */
-header {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 16px;
-  align-items: center;
+/* BUTTON */
+button{
+  background:linear-gradient(45deg,#ff6a00,#ff3131);
+  border:none;
+  padding:14px;
+  border-radius:12px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 0 20px #ff6a00;
 }
-#menuBtn {
-  font-size: 26px;
-  cursor: pointer;
+button:hover{box-shadow:0 0 40px #ff3131}
+
+/* CONTAINER */
+.container{
+  max-width:420px;
+  margin:auto;
+  padding:20px;
+  text-align:center;
 }
 
-/* ===== MENU ===== */
-#menuPanel {
-  position: absolute;
-  top: 50px;
-  right: 10px;
-  background: #111;
-  border-radius: 10px;
-  padding: 10px;
-  display: none;
-}
-#menuPanel button {
-  display: block;
-  width: 100%;
-  margin: 6px 0;
+/* INPUT */
+input{
+  width:100%;
+  padding:14px;
+  margin:8px 0;
+  background:#000;
+  border:1px solid #ff6a00;
+  color:#fff;
 }
 
-/* ===== BUTTON ===== */
-button {
-  background: linear-gradient(45deg, orange, red);
-  border: none;
-  padding: 14px;
-  border-radius: 10px;
-  color: #000;
-  font-weight: bold;
-  box-shadow: 0 0 20px orange;
-  transition: 0.3s;
-}
-button:hover {
-  box-shadow: 0 0 40px red;
+/* CYBER GRID */
+canvas{
+  position:fixed;
+  inset:0;
+  z-index:-1;
 }
 
-/* ===== SCANNER ===== */
-#scanner {
-  display: flex;
-  justify-content: center;
-  margin-top: 100px;
+/* BUBBLES */
+.bubble{
+  position:absolute;
+  bottom:-20px;
+  width:6px;
+  height:6px;
+  background:#ff6a00;
+  border-radius:50%;
+  animation:bubble 6s linear infinite;
 }
-
-/* ===== CYBER GRID ===== */
-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-}
-
-/* ===== BUBBLES ===== */
-.bubble {
-  position: absolute;
-  bottom: -20px;
-  width: 6px;
-  height: 6px;
-  background: orange;
-  border-radius: 50%;
-  animation: bubble 6s linear infinite;
-}
-@keyframes bubble {
-  from { transform: translateY(0); opacity: 1; }
-  to { transform: translateY(-120vh); opacity: 0; }
+@keyframes bubble{
+  from{transform:translateY(0);opacity:1}
+  to{transform:translateY(-120vh);opacity:0}
 }
 </style>
 </head>
 
-<body class="dark cyber">
-
+<body>
 <header>
-  <h2>SECURE SCAN</h2>
+  <h3>PJ-ECC</h3>
   <div id="menuBtn">⋮</div>
 </header>
 
-<div id="menuPanel">
-  <button onclick="toggleMute()">Mute</button>
-  <button onclick="toggleTheme()">Light / Dark</button>
-  <button onclick="toggleCyber()">Cyber Mode</button>
+<div id="menu">
+  <button onclick="muted=!muted">Mute</button>
+  <button onclick="document.body.classList.toggle('light')">Theme</button>
+  <button onclick="toggleCyber()">Cyber</button>
 </div>
 
 <canvas id="grid"></canvas>
-
-<div id="scanner">
-  <button onclick="scanToken()">SCAN TOKEN</button>
-</div>
+<div id="app"></div>
 
 <audio id="beep">
-  <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=">
+<source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=">
 </audio>
 
 <script>
+/* ===== CONFIG ===== */
+const SECRET="PJ_ECC_2026";
+const ADMIN=btoa("sonu@jeet");
+const LIFE=6*60*60*1000;
+let used=JSON.parse(localStorage.getItem("USED")||"[]");
+
 /* ===== STATE ===== */
-let muted = false;
-let cyberOn = true;
+let muted=false, cyber=true;
 
 /* ===== MENU ===== */
-menuBtn.onclick = () => {
-  menuPanel.style.display =
-    menuPanel.style.display === "block" ? "none" : "block";
-};
+menuBtn.onclick=()=>menu.style.display=menu.style.display?"":"block";
 
-function toggleMute() {
-  muted = !muted;
-}
-function toggleTheme() {
-  document.body.classList.toggle("light");
-}
-function toggleCyber() {
-  cyberOn = !cyberOn;
-  grid.style.display = cyberOn ? "block" : "none";
+/* ===== RENDER ===== */
+const app=document.getElementById("app");
+const render=h=>app.innerHTML=h;
+
+/* ===== HOME ===== */
+function home(){
+render(`<div class="container">
+<button onclick="scan()">SCAN</button>
+<button onclick="login()">ADMIN</button>
+</div>`);
 }
 
-/* ===== DEVICE FINGERPRINT (CLIENT LEVEL) ===== */
-function fingerprint() {
-  return btoa(
-    navigator.userAgent +
-    screen.width +
-    screen.height +
-    navigator.language
-  );
+/* ===== LOGIN ===== */
+function login(){
+render(`<div class="container">
+<input id="p" type="password" placeholder="KEY">
+<button onclick="btoa(p.value)==ADMIN?admin():home()">ENTER</button>
+</div>`);
 }
 
-/* ===== TOKEN SCAN + EXPIRY LOGIC ===== */
-function scanToken() {
-  if (!muted) beep.play();
-
-  const raw = prompt("Paste Token JSON:");
-  if (!raw) return;
-
-  let token;
-  try {
-    token = JSON.parse(raw);
-  } catch {
-    alert("INVALID TOKEN FORMAT");
-    return;
-  }
-
-  if (token.expiry !== "NONE" && Date.now() > token.expiry) {
-    alert("❌ EXPIRED");
-    return;
-  }
-
-  if (token.fp && token.fp !== fingerprint()) {
-    alert("❌ DEVICE MISMATCH");
-    return;
-  }
-
-  alert("✅ ACCESS GRANTED");
+/* ===== ADMIN ===== */
+function admin(){
+render(`<div class="container">
+<input id="n" placeholder="Name">
+<input id="a" placeholder="Address">
+<input id="r" placeholder="Ref">
+<button onclick="gen()">GENERATE</button>
+<div id="qr"></div>
+</div>`);
 }
 
-/* ===== CYBER GRID ANIMATION ===== */
-const ctx = grid.getContext("2d");
-function drawGrid() {
-  grid.width = innerWidth;
-  grid.height = innerHeight;
-  ctx.clearRect(0,0,grid.width,grid.height);
-  ctx.strokeStyle = "rgba(255,140,0,0.15)";
-  for (let x=0;x<grid.width;x+=40){
-    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,grid.height);ctx.stroke();
-  }
-  for (let y=0;y<grid.height;y+=40){
-    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(grid.width,y);ctx.stroke();
-  }
+/* ===== TOKEN ===== */
+function create(data){
+data.iat=Date.now();
+data.exp=Date.now()+LIFE;
+const b=btoa(JSON.stringify(data));
+return b+"."+btoa(b+SECRET);
 }
-setInterval(drawGrid, 1200);
+function verify(t){
+if(used.includes(t)) return null;
+const[p,s]=t.split(".");
+if(btoa(p+SECRET)!==s) return null;
+const d=JSON.parse(atob(p));
+if(Date.now()>d.exp) return null;
+used.push(t);
+localStorage.setItem("USED",JSON.stringify(used));
+return d;
+}
 
-/* ===== BUBBLE FIX (NOT REMOVED) ===== */
+/* ===== QR ===== */
+function gen(){
+const d={name:n.value,addr:a.value,ref:r.value};
+if(!d.name||!d.addr||!d.ref) return;
+qr.innerHTML="";
+new QRCode(qr,{text:create(d),width:200,height:200});
+}
+
+/* ===== SCAN ===== */
+function scan(){
+render(`<div class="container"><div id="reader"></div></div>`);
+const q=new Html5Qrcode("reader");
+q.start({facingMode:"environment"},{fps:30,qrbox:250},txt=>{
+q.stop();
+if(!muted) beep.play();
+const v=verify(txt);
+v?render(`<div class="container"><h2>VERIFIED</h2>${v.name}</div>`):home();
+});
+}
+
+/* ===== CYBER GRID ===== */
+const ctx=grid.getContext("2d");
+function draw(){
+grid.width=innerWidth;
+grid.height=innerHeight;
+ctx.clearRect(0,0,grid.width,grid.height);
+ctx.strokeStyle="rgba(255,140,0,0.15)";
+for(let x=0;x<grid.width;x+=40){
+ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,grid.height);ctx.stroke();
+}
+}
+setInterval(()=>cyber&&draw(),1200);
+
+/* ===== BUBBLES ===== */
 setInterval(()=>{
-  if(!cyberOn) return;
-  const b=document.createElement("div");
-  b.className="bubble";
-  b.style.left=Math.random()*100+"vw";
-  document.body.appendChild(b);
-  setTimeout(()=>b.remove(),6000);
-},600);
-</script>
+if(!cyber) return;
+const b=document.createElement("div");
+b.className="bubble";
+b.style.left=Math.random()*100+"vw";
+document.body.appendChild(b);
+setTimeout(()=>b.remove(),6000);
+},700);
 
+function toggleCyber(){
+cyber=!cyber;
+grid.style.display=cyber?"block":"none";
+}
+
+home();
+</script>
 </body>
 </html>
