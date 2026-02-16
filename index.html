@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PJ-ECC | Luxury Holographic System</title>
     
-    <!-- Premium Fonts -->
+    <script src="security-engine.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Playfair+Display:ital,wght@0,700;1,700&family=Roboto:wght@300;400;900&display=swap" rel="stylesheet">
     
-    <!-- Scripts -->
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -50,7 +50,6 @@
         .logo-main { font-family: 'Orbitron', sans-serif; font-size: 2.5em; font-weight: 900; color: var(--pj-orange); text-shadow: 0 0 20px rgba(255, 106, 0, 0.4); }
         .tagline { font-size: 0.6em; letter-spacing: 6px; opacity: 0.5; text-transform: uppercase; margin-bottom: 25px; display: block; }
 
-        /* --- LUXURY TRANSPARENT CARD --- */
         .luxury-card {
             position: relative;
             width: 100%;
@@ -67,7 +66,6 @@
             z-index: 1;
         }
 
-        /* Life-like Holographic Flower Pattern */
         .flower-bg {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -91,7 +89,6 @@
             50% { transform: scale(1.2) rotate(45deg); opacity: 0.8; stroke-dasharray: 100, 0; }
         }
 
-        /* Card Header */
         .card-header {
             padding: 20px;
             background: linear-gradient(to right, rgba(255,106,0,0.2), transparent);
@@ -107,7 +104,6 @@
             text-shadow: 0 0 10px var(--pj-orange);
         }
 
-        /* Card Content */
         .card-content { padding: 30px; text-align: left; }
         .info-group { margin-bottom: 20px; }
         .info-label { 
@@ -129,7 +125,6 @@
             font-style: italic;
         }
 
-        /* UI Elements */
         .btn { 
             width: 100%; height: 55px; border-radius: 15px; border: none; font-weight: 900; 
             text-transform: uppercase; cursor: pointer; margin-top: 15px; transition: 0.3s;
@@ -149,7 +144,6 @@
 
         .hidden { display: none !important; }
 
-        /* --- SCANNER BUBBLE UI --- */
         .scanner-box {
             position: relative; width: 100%; aspect-ratio: 1/1; border-radius: 30px;
             overflow: hidden; border: 2px solid var(--pj-orange);
@@ -157,7 +151,6 @@
             background: #000;
         }
         #reader { width: 100%; height: 100%; position: relative; }
-        #reader__scan_region { border: none !important; }
 
         .scan-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -183,14 +176,12 @@
             border-radius: 50%; animation: bubble-expand 3s infinite; opacity: 0;
         }
         .bubble-2 { animation-delay: 1s; }
-        .bubble-3 { animation-delay: 2s; }
 
         @keyframes bubble-expand {
             0% { width: 10px; height: 10px; opacity: 1; border-width: 4px; }
             100% { width: 350px; height: 350px; opacity: 0; border-width: 1px; }
         }
 
-        /* --- ERROR MESSAGE STYLE --- */
         .error-card {
             background: rgba(40, 0, 0, 0.6);
             border: 2px solid var(--pj-red);
@@ -217,7 +208,6 @@
 <body>
 
     <div class="container">
-        <!-- Home View -->
         <div id="view-home">
             <h1 class="logo-main">PJ-ECC</h1>
             <span class="tagline">Premium Access Port</span>
@@ -230,7 +220,6 @@
             <button onclick="switchView('view-login')" class="btn btn-secondary" style="margin-top:20px; font-size: 0.7em; opacity: 0.6; border: none;">ADMIN ACCESS</button>
         </div>
 
-        <!-- Login View -->
         <div id="view-login" class="hidden">
             <h2 class="logo-main" style="font-size: 1.5em;">GATEWAY</h2>
             <input type="password" id="adminPass" class="input-field" placeholder="SECURE KEY">
@@ -238,7 +227,6 @@
             <button onclick="switchView('view-home')" class="btn btn-secondary">BACK</button>
         </div>
 
-        <!-- Admin View -->
         <div id="view-admin" class="hidden">
             <h2 class="logo-main" style="font-size: 1.5em;">CARD MAKER</h2>
             <input type="text" id="mName" class="input-field" placeholder="FULL NAME">
@@ -256,7 +244,6 @@
             <button onclick="location.reload()" class="btn btn-secondary" style="margin-top:10px;">HOME</button>
         </div>
 
-        <!-- Scanner View -->
         <div id="view-scanner" class="hidden">
             <div class="scanner-box">
                 <div id="reader"></div>
@@ -270,7 +257,6 @@
             <button onclick="location.reload()" class="btn btn-secondary">CANCEL</button>
         </div>
 
-        <!-- Error Message View (Premium Quality) -->
         <div id="view-error" class="hidden">
             <div class="error-card">
                 <div class="error-icon">⚠️</div>
@@ -282,7 +268,6 @@
             </div>
         </div>
 
-        <!-- Result Card View -->
         <div id="view-card" class="hidden">
             <div class="luxury-card" id="final-card">
                 <div class="flower-bg">
@@ -314,7 +299,7 @@
                     </div>
                 </div>
                 <div style="margin-top: auto; padding: 20px; text-align: right; opacity: 0.3; font-size: 0.5em; letter-spacing: 3px;">
-                    ENCRYPTED HOLO-SYSTEM V4.2
+                    SECURE ENGINE PROTECTED
                 </div>
             </div>
             <button onclick="location.reload()" class="btn btn-primary" style="margin-top:30px;">CLOSE ACCESS</button>
@@ -359,24 +344,32 @@
                 .catch(err => { switchView('view-error'); });
         }
 
+        // --- ENCRYPTED PROCESSING LOGIC ---
         function processToken(data) {
             try {
-                // PJ-ECC Validation logic: Check for our specific URL parameters
-                const url = new URL(data);
-                const p = new URLSearchParams(url.search);
+                let decrypted;
                 
-                if(!p.has('n') || !p.has('a')) {
-                    throw new Error("Invalid Token");
+                // Check if data is encrypted (using SecurityEngine)
+                if(data.startsWith("SEC|")) {
+                    const cleanData = data.split("SEC|")[1];
+                    decrypted = SecurityEngine.secureDecrypt(cleanData);
+                } else {
+                    // Normal URL fallback for old testing
+                    const url = new URL(data);
+                    const p = new URLSearchParams(url.search);
+                    if(!p.has('n')) throw new Error("Unverified");
+                    decrypted = JSON.stringify(Object.fromEntries(p));
                 }
 
+                const userData = JSON.parse(decrypted);
+
                 switchView('view-card');
-                document.getElementById('resName').innerText = p.get('n');
-                document.getElementById('resDate').innerText = p.get('d');
-                document.getElementById('resAddr').innerText = p.get('a');
-                document.getElementById('resRef').innerText = p.get('r');
+                document.getElementById('resName').innerText = userData.n || "Unknown";
+                document.getElementById('resDate').innerText = userData.d || "--";
+                document.getElementById('resAddr').innerText = userData.a || "--";
+                document.getElementById('resRef').innerText = userData.r || "No Ref";
 
             } catch(e) {
-                // If not a PJ-ECC QR code, show the premium error screen
                 switchView('view-error');
             }
         }
@@ -392,15 +385,20 @@
             qrd.innerHTML = "";
             document.getElementById('qr-result').classList.remove('hidden');
 
-            const payload = `${window.location.origin}${window.location.pathname}?n=${encodeURIComponent(n)}&d=${encodeURIComponent(d)}&a=${encodeURIComponent(a)}&r=${encodeURIComponent(r)}`;
+            // JSON Object for data
+            const rawData = JSON.stringify({ n, d, a, r });
+            
+            // Security Engine se data ko encrypt karna (atob reverse logic)
+            const encrypted = btoa(rawData).split('').reverse().join('');
+            const finalPayload = "SEC|" + encrypted;
 
-            new QRCode(qrd, { text: payload, width: 200, height: 200 });
+            new QRCode(qrd, { text: finalPayload, width: 200, height: 200 });
         }
 
         function saveQR() {
             html2canvas(document.getElementById('qr-wrap')).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'PJ-ECC-TOKEN.png';
+                link.download = 'PJ-ECC-SECURE-TOKEN.png';
                 link.href = canvas.toDataURL();
                 link.click();
             });
@@ -413,4 +411,3 @@
     </script>
 </body>
 </html>
-
