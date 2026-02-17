@@ -1,149 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PJ-ECC Premium QR System</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;900&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/html5-qrcode"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<style>
-:root{--pj-orange:#FF6A00;--pj-red:#FF3131;--bg-dark:#050505;}
-body{margin:0;font-family:'Roboto',sans-serif;background:var(--bg-dark);color:#fff;overflow:hidden;}
-.container{max-width:450px;width:90%;padding:25px;border-radius:30px;background:rgba(15,15,15,0.95);border:1px solid rgba(255,106,0,0.2);text-align:center;position:relative;}
-.btn{border:none;border-radius:12px;padding:12px;font-weight:900;cursor:pointer;transition:0.3s;}
-.btn-primary{background:linear-gradient(45deg,var(--pj-orange),var(--pj-red));color:#fff;}
-.btn-primary:hover{box-shadow:0 0 20px var(--pj-orange);transform:scale(1.02);}
-#menuBtn{position:absolute;top:15px;right:20px;font-size:26px;cursor:pointer;}
-#menuPanel{position:absolute;top:50px;right:20px;background:#111;border-radius:10px;padding:10px;display:none;}
-#menuPanel button{display:block;width:100%;margin:6px 0;}
-canvas#holoCanvas{position:fixed;inset:0;z-index:-1;}
-.bubble{position:absolute;bottom:-20px;width:6px;height:6px;background:var(--pj-orange);border-radius:50%;animation:bubble 6s linear infinite;}
-@keyframes bubble{from{transform:translateY(0);opacity:1;}to{transform:translateY(-120vh);opacity:0;}}
-#adminLockBox,#employeeBox,#qrCard{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.9);padding:25px;border-radius:25px;display:flex;flex-direction:column;align-items:center;}
-#adminLockBox button,#employeeBox button,#qrCard button{margin-top:15px;width:80%;}
-.tick{width:50px;height:50px;border-radius:50%;background:green;display:flex;align-items:center;justify-content:center;margin-bottom:15px;}
-.tick:after{content:'✔';color:#fff;font-size:28px;}
-select,input{margin:5px 0;padding:10px;width:100%;border-radius:10px;border:1px solid var(--pj-orange);background:#000;color:#fff;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PJ-ECC | Secure Portal Ultimate v8.0</title>
+    
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --pj-orange: #ff6a00;
+            --pj-red: #ff3131;
+            --pj-green: #00ff88;
+            --bg-dark: #050505;
+            --card-bg: rgba(10, 10, 10, 0.98);
+            --border-color: rgba(255, 106, 0, 0.4);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { margin: 0; font-family: 'Roboto', sans-serif; background: var(--bg-dark); color: #fff; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+
+        header { padding: 15px; text-align: center; background: #000; border-bottom: 1px solid var(--border-color); font-family: 'Orbitron'; color: var(--pj-orange); letter-spacing: 2px; font-weight: 900; }
+
+        .container { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; position: relative; }
+        
+        .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 35px; padding: 25px; width: 100%; max-width: 420px; box-shadow: 0 0 30px rgba(255,106,0,0.1); margin-top: 10px; z-index: 5; transition: all 0.3s ease; }
+
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 15px; font-family: 'Orbitron'; font-weight: 900; cursor: pointer; margin-top: 15px; background: linear-gradient(90deg, #ff4e00, #ec1c24); color: #fff; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s; }
+        .btn:active { transform: scale(0.95); }
+        .btn:disabled { background: #222; color: #444; cursor: not-allowed; opacity: 0.5; }
+        
+        .btn.sec { background: transparent; border: 1px solid #333; }
+
+        /* Admin Trigger Button */
+        .admin-btn {
+            margin-top: 40px;
+            background: rgba(255, 106, 0, 0.05);
+            border: 1px solid rgba(255, 106, 0, 0.3);
+            color: var(--pj-orange);
+            font-size: 11px;
+            letter-spacing: 2px;
+            padding: 15px;
+        }
+
+        /* Password Modal Styling */
+        .login-box { text-align: center; }
+        .pass-input {
+            width: 100%;
+            background: #111;
+            border: 1px solid #333;
+            padding: 15px;
+            border-radius: 10px;
+            color: #fff;
+            font-family: 'Orbitron';
+            text-align: center;
+            font-size: 18px;
+            margin: 20px 0;
+            transition: border-color 0.3s;
+        }
+        .pass-input:focus { border-color: var(--pj-orange); }
+        .pass-input.valid { border-color: var(--pj-green); box-shadow: 0 0 10px var(--pj-green); }
+
+        .back-link { margin-top: 20px; display: block; color: #666; font-size: 12px; cursor: pointer; text-decoration: underline; font-family: 'Orbitron'; }
+        .back-link:hover { color: var(--pj-red); }
+
+        /* Scanner Elements */
+        .scanner-container {
+            position: relative; width: 100%; aspect-ratio: 1/1; margin: 0 auto;
+            border-radius: 25px; overflow: hidden; border: 4px solid var(--pj-orange); background: #000;
+        }
+        .scanner-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 10; }
+        .pulse-ring { position: absolute; width: 10px; height: 10px; border: 2px solid var(--pj-orange); border-radius: 50%; opacity: 0; animation: ringPulse 2.5s infinite; }
+        @keyframes ringPulse { 0% { width: 10px; height: 10px; opacity: 1; } 100% { width: 350px; height: 350px; opacity: 0; } }
+
+        /* Result View */
+        .id-card { 
+            width: 320px; background: #000; border: 1px solid var(--pj-orange); 
+            border-radius: 25px; overflow: hidden; box-shadow: 0 20px 50px #000;
+        }
+        .card-top { height: 60px; background: var(--pj-orange); display: flex; align-items: center; justify-content: center; font-family: 'Orbitron'; font-weight: 900; color: #000; }
+        .card-body { padding: 20px; }
+        .info-value { font-size: 16px; font-weight: bold; font-family: 'Orbitron'; margin-bottom: 15px; color: #fff; }
+
+        .hidden { display: none !important; }
+    </style>
 </head>
 <body>
-<canvas id="holoCanvas"></canvas>
 
-<div class="container">
-  <h1 style="font-family:'Orbitron';color:var(--pj-orange)">PJ-ECC</h1>
-  <p>Premium QR Verification System<br>Scan, verify, track expiry & purpose.</p>
-  <div id="menuBtn">⋮</div>
-  <div id="menuPanel">
-    <button onclick="toggleMute()">Mute</button>
-    <button onclick="toggleTheme()">Light / Dark</button>
-    <button onclick="toggleCyber()">Cyber Mode</button>
-    <button onclick="showChangeLog()">What's New?</button>
-  </div>
-  <div id="scanner">
-    <button class="btn-primary" onclick="startScan()">Start Scan</button>
-    <button class="btn-primary" onclick="scanGallery()">Scan from Gallery</button>
-  </div>
-</div>
+    <header>PJ-ECC v8.0</header>
 
-<!-- Admin Lock -->
-<div id="adminLockBox">
-  <div class="tick"></div>
-  <p>Enter Admin Key:</p>
-  <input type="password" id="adminKey" placeholder="Admin Key">
-  <button class="btn-primary" onclick="unlockAdmin()">Unlock</button>
-</div>
+    <div class="container">
+        <!-- Home Page -->
+        <div id="viewHome" class="card">
+            <h2 style="font-family:Orbitron; color:var(--pj-orange); text-align:center; margin-bottom:30px;">SECURITY ACCESS</h2>
+            <button class="btn" onclick="startScanner()">LIVE SCANNER</button>
+            <button class="btn sec" onclick="document.getElementById('galleryInput').click()">GALLERY SCAN</button>
+            <input type="file" id="galleryInput" accept="image/*" class="hidden" onchange="scanImage(this)">
+            
+            <button class="btn admin-btn" onclick="showLogin()">SYSTEM ADMINISTRATION</button>
+        </div>
 
-<!-- Employee Detail Setup -->
-<div id="employeeBox" style="display:none;">
-  <p>Employee Details</p>
-  <input id="empName" placeholder="Employee Name">
-  <input id="empRef" placeholder="Reference ID">
-  <select id="empPurpose">
-    <option value="ENTRY">ENTRY</option>
-    <option value="VISITOR">VISITOR</option>
-    <option value="TEMP">TEMP</option>
-    <option value="AUDIT">AUDIT</option>
-  </select>
-  <input type="datetime-local" id="empExpiry">
-  <button class="btn-primary" onclick="generateToken()">Generate QR</button>
-</div>
+        <!-- Admin Login Screen -->
+        <div id="viewLogin" class="card hidden">
+            <div class="login-box">
+                <h3 style="font-family:Orbitron; color:var(--pj-orange);">ADMIN LOGIN</h3>
+                <p style="font-size:10px; opacity:0.6;">ENTER ACCESS KEY TO CONTINUE</p>
+                
+                <input type="password" id="adminPass" class="pass-input" placeholder="••••••••" oninput="checkPass()">
+                
+                <button id="loginBtn" class="btn" onclick="accessAdmin()" disabled>CONTINUE TO PANEL</button>
+                <span class="back-link" onclick="showHome()">← BACK TO HOME</span>
+            </div>
+        </div>
 
-<!-- QR Card Popup -->
-<div id="qrCard" style="display:none;">
-  <p id="qrEmpName"></p>
-  <p id="qrEmpPurpose"></p>
-  <p id="qrEmpRef"></p>
-  <p id="qrEmpExpiry"></p>
-  <div id="qrCode"></div>
-  <button class="btn-primary" onclick="closeCard()">Close</button>
-</div>
+        <!-- Admin Panel (Employee Details Page) -->
+        <div id="viewSetup" class="card hidden">
+            <h3 style="font-family:Orbitron; color:var(--pj-orange); text-align:center;">ADMIN PANEL</h3>
+            <p style="font-size:10px; color:var(--pj-green); text-align:center; margin-bottom:20px;">✓ AUTHENTICATED ACCESS</p>
+            
+            <input type="text" id="setupName" placeholder="Employee Name" class="btn sec" style="text-align:left;" oninput="validateSetup()">
+            <input type="text" id="setupRef" placeholder="Ref ID (e.g. PJ-101)" class="btn sec" style="text-align:left;" oninput="validateSetup()">
+            <input type="text" id="setupExp" value="17 FEB 2027" class="btn sec" style="text-align:left;">
+            
+            <button class="btn" id="genBtn" onclick="generateSecureQR()" disabled>GENERATE ACCESS QR</button>
+            
+            <div id="qrPreviewArea" class="hidden" style="margin-top:20px; text-align:center;">
+                <div id="qrcode" style="background:#fff; padding:10px; display:inline-block; border-radius:10px;"></div>
+                <p style="font-size:10px; margin-top:5px; opacity:0.6;">SAVE THIS FOR EMPLOYEE</p>
+            </div>
 
-<audio id="beep"><source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="></audio>
-<audio id="adminBeep"><source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="></audio>
+            <button class="btn sec" onclick="showHome()" style="margin-top:20px; border-color:var(--pj-red); color:var(--pj-red);">LOGOUT</button>
+        </div>
 
-<script>
-/* ---------------- HOLOGRAPHIC BG ---------------- */
-const canvas=document.getElementById('holoCanvas'),ctx=canvas.getContext('2d');
-function resizeCanvas(){canvas.width=innerWidth;canvas.height=innerHeight;}
-window.addEventListener('resize',resizeCanvas);resizeCanvas();
-let particles=[];for(let i=0;i<120;i++){particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*2+1,dx:(Math.random()-0.5)*0.5,dy:(Math.random()-0.5)*0.5});}
-function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);for(let p of particles){ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,2*Math.PI);ctx.fillStyle=`rgba(255,106,0,0.2)`;ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x>canvas.width)p.x=0;if(p.x<0)p.x=canvas.width;if(p.y>canvas.height)p.y=0;if(p.y<0)p.y=canvas.height;}}
-setInterval(draw,33);
-setInterval(()=>{const b=document.createElement('div');b.className='bubble';b.style.left=Math.random()*100+'vw';document.body.appendChild(b);setTimeout(()=>b.remove(),6000);},600);
+        <!-- Scanner View -->
+        <div id="viewScanner" class="card hidden">
+            <div class="scanner-container" id="scannerBorder">
+                <div id="reader"></div>
+                <div class="scanner-overlay" id="ringOverlay">
+                    <div class="pulse-ring"></div>
+                </div>
+            </div>
+            <button class="btn sec" onclick="stopScanner()">CANCEL</button>
+        </div>
 
-/* ---------------- MENU ---------------- */
-const menuBtn=document.getElementById('menuBtn'),menuPanel=document.getElementById('menuPanel');
-menuBtn.onclick=()=>{menuPanel.style.display=menuPanel.style.display==='block'?'none':'block';};
-let muted=false,cyberOn=true;
-function toggleMute(){muted=!muted;}
-function toggleTheme(){document.body.classList.toggle('light');}
-function toggleCyber(){cyberOn=!cyberOn;canvas.style.display=cyberOn?'block':'none';}
+        <!-- Result View -->
+        <div id="viewResult" class="hidden">
+            <div class="id-card">
+                <div class="card-top">GRANTED</div>
+                <div class="card-body">
+                    <div class="info-value" id="resName" style="color:var(--pj-orange);">---</div>
+                    <div class="info-value" id="resID" style="font-size:12px; opacity:0.7;">---</div>
+                    <div class="info-value" id="resExp" style="font-size:10px; color:var(--pj-green);">---</div>
+                </div>
+            </div>
+            <button class="btn" onclick="showHome()">BACK</button>
+        </div>
+    </div>
 
-/* ---------------- ADMIN UNLOCK ---------------- */
-function unlockAdmin(){
-  const key=document.getElementById('adminKey').value;
-  if(key==='sonu@admin'){ // demo key
-    document.getElementById('adminLockBox').style.display='none';
-    document.getElementById('employeeBox').style.display='flex';
-    if(!muted)document.getElementById('adminBeep').play();
-    alert("✅ Admin unlocked! Proceed to employee setup.");
-  } else alert("❌ Wrong Key");
-}
+    <script>
+        const $ = id => document.getElementById(id);
+        let html5QrCode = null;
 
-/* ---------------- GENERATE TOKEN ---------------- */
-function generateToken(){
-  const name=document.getElementById('empName').value.trim();
-  const ref=document.getElementById('empRef').value.trim();
-  const purpose=document.getElementById('empPurpose').value;
-  const expiry=document.getElementById('empExpiry').value;
-  if(!name||!ref||!expiry){alert("Fill all details"); return;}
-  const token={name,purpose,ref,expiry};
-  showCard(token);
-}
+        function showHome() { 
+            hideAll(); 
+            $('viewHome').classList.remove('hidden'); 
+            $('adminPass').value = "";
+            checkPass();
+        }
 
-/* ---------------- SHOW QR CARD ---------------- */
-function showCard(data){
-  document.getElementById('qrEmpName').textContent="Name: "+data.name;
-  document.getElementById('qrEmpPurpose').textContent="Purpose: "+data.purpose;
-  document.getElementById('qrEmpRef').textContent="Ref: "+data.ref;
-  document.getElementById('qrEmpExpiry').textContent="Expires: "+data.expiry;
-  const qrDiv=document.getElementById('qrCode'); qrDiv.innerHTML="";
-  new QRCode(qrDiv,{text:JSON.stringify(data),width:180,height:180});
-  document.getElementById('qrCard').style.display='flex';
-  if(!muted)document.getElementById('beep').play();
-}
-function closeCard(){document.getElementById('qrCard').style.display='none';}
+        function showLogin() {
+            hideAll();
+            $('viewLogin').classList.remove('hidden');
+            $('adminPass').focus();
+        }
 
-/* ---------------- SCAN PLACEHOLDER ---------------- */
-function startScan(){alert("Camera scan starts (placeholder)"); if(!muted)document.getElementById('beep').play();}
-function scanGallery(){alert("Gallery scan placeholder");}
+        function hideAll() { 
+            document.querySelectorAll('.card, #viewResult').forEach(v => v.classList.add('hidden')); 
+        }
 
-/* ---------------- CHANGE LOG ---------------- */
-function showChangeLog(){alert("PJ-ECC Update Log:\n- Premium QR animation\n- Admin lock with tick & beep\n- Employee detail setup\n- Holographic background\n- Scan expiry & purpose tracking");}
+        // Admin Logic
+        function checkPass() {
+            const pass = $('adminPass').value;
+            const btn = $('loginBtn');
+            const input = $('adminPass');
+            
+            if (pass === "sonu@jeet") {
+                btn.disabled = false;
+                input.classList.add('valid');
+            } else {
+                btn.disabled = true;
+                input.classList.remove('valid');
+            }
+        }
 
-/* ---------------- SECURITY HARDENING ---------------- */
-document.onkeydown=e=>{if(e.key==="F12"|| (e.ctrlKey&&e.shiftKey)) e.preventDefault();};
-</script>
+        function accessAdmin() {
+            hideAll();
+            $('viewSetup').classList.remove('hidden');
+        }
+
+        function validateSetup() {
+            $('genBtn').disabled = !($('setupName').value && $('setupRef').value);
+        }
+
+        function generateSecureQR() {
+            const data = { n: $('setupName').value, r: $('setupRef').value, e: $('setupExp').value, s: "SECURE_PJ_V3" };
+            $('qrcode').innerHTML = "";
+            new QRCode($('qrcode'), { text: btoa(JSON.stringify(data)), width: 150, height: 150 });
+            $('qrPreviewArea').classList.remove('hidden');
+        }
+
+        // Scanner Logic
+        async function startScanner() {
+            hideAll();
+            $('viewScanner').classList.remove('hidden');
+            html5QrCode = new Html5Qrcode("reader");
+            await html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 200 }, onScanSuccess);
+        }
+
+        async function stopScanner() {
+            if (html5QrCode) await html5QrCode.stop();
+            showHome();
+        }
+
+        function onScanSuccess(decodedText) {
+            try {
+                const data = JSON.parse(atob(decodedText));
+                if (data.s === "SECURE_PJ_V3") {
+                    if (html5QrCode) html5QrCode.stop();
+                    hideAll();
+                    $('resName').innerText = data.n;
+                    $('resID').innerText = data.r;
+                    $('resExp').innerText = data.e;
+                    $('viewResult').classList.remove('hidden');
+                }
+            } catch(e) {}
+        }
+
+        function scanImage(input) {
+            if (!input.files[0]) return;
+            const tempReader = new Html5Qrcode("reader");
+            tempReader.scanFile(input.files[0], true).then(onScanSuccess).catch(() => alert("Invalid Code"));
+        }
+    </script>
 </body>
 </html>
+
+
