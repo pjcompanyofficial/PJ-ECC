@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PJ-ECC Premium QR PWA</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+:root{--pj-orange:#FF6A00;--pj-red:#FF3131;--bg-dark:#050505;}
+body{margin:0;font-family:'Roboto',sans-serif;background:var(--bg-dark);color:#fff;overflow:hidden;}
+.container{max-width:420px;width:90%;padding:25px;border-radius:30px;background:rgba(15,15,15,0.95);border:1px solid rgba(255,106,0,0.2);text-align:center;position:relative;}
+.btn{border:none;border-radius:12px;padding:12px;font-weight:900;cursor:pointer;transition:0.3s;}
+.btn-primary{background:linear-gradient(45deg,var(--pj-orange),var(--pj-red));color:#fff;}
+.btn-primary:hover{box-shadow:0 0 20px var(--pj-orange);transform:scale(1.02);}
+#installBox,#updateBox{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.9);padding:20px;border-radius:25px;display:flex;flex-direction:column;align-items:center;}
+#installBox button,#updateBox button{margin-top:15px;width:80%;}
+#menuBtn{position:absolute;top:15px;right:20px;font-size:26px;cursor:pointer;}
+#menuPanel{position:absolute;top:50px;right:20px;background:#111;border-radius:10px;padding:10px;display:none;}
+#menuPanel button{display:block;width:100%;margin:6px 0;}
+#scanner,#galleryScan{margin-top:20px;}
+canvas#holoCanvas{position:fixed;inset:0;z-index:-1;}
+.bubble{position:absolute;bottom:-20px;width:6px;height:6px;background:var(--pj-orange);border-radius:50%;animation:bubble 6s linear infinite;}
+@keyframes bubble{from{transform:translateY(0);opacity:1;}to{transform:translateY(-120vh);opacity:0;}}
+</style>
+</head>
+<body>
+<canvas id="holoCanvas"></canvas>
+
+<div class="container">
+  <h1 style="font-family:'Orbitron';color:var(--pj-orange)">PJ-ECC</h1>
+  <p>Premium QR Verification System<br>Scan, verify, track expiry & purpose.</p>
+
+  <div id="menuBtn">⋮</div>
+  <div id="menuPanel">
+    <button onclick="toggleMute()">Mute</button>
+    <button onclick="toggleTheme()">Light / Dark</button>
+    <button onclick="toggleCyber()">Cyber Mode</button>
+    <button onclick="showChangeLog()">What's New?</button>
+  </div>
+
+  <div id="scanner">
+    <button class="btn-primary" onclick="startScan()">Start Scan</button>
+    <button class="btn-primary" onclick="scanGallery()">Scan from Gallery</button>
+  </div>
+
+  <div id="installBox">
+    <p style="font-weight:bold;">Install PJ-ECC App for Full Experience</p>
+    <button id="installBtn" class="btn-primary">Install App</button>
+  </div>
+
+  <div id="updateBox" style="display:none;">
+    <p style="font-weight:bold;" id="updateMsg"></p>
+    <button id="updateBtn" class="btn-primary">Update</button>
+  </div>
+
+</div>
+
+<audio id="beep"><source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="></audio>
+
+<script>
+/* ---------------- PWA INSTALL ---------------- */
+let deferredPrompt;
+const installBtn=document.getElementById('installBtn');
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  installBtn.style.display='block';
+});
+installBtn.addEventListener('click',async()=>{
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    const choice=await deferredPrompt.userChoice;
+    if(choice.outcome==='accepted'){ installBtn.style.display='none'; }
+    deferredPrompt=null;
+  }
+});
+
+/* ---------------- HOLOGRAPHIC BG ---------------- */
+const canvas=document.getElementById('holoCanvas'),ctx=canvas.getContext('2d');
+function resizeCanvas(){canvas.width=innerWidth;canvas.height=innerHeight;}
+window.addEventListener('resize',resizeCanvas);resizeCanvas();
+let particles=[];for(let i=0;i<120;i++){particles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*2+1,dx:(Math.random()-0.5)*0.5,dy:(Math.random()-0.5)*0.5});}
+function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);for(let p of particles){ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,2*Math.PI);ctx.fillStyle=`rgba(255,106,0,0.2)`;ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x>canvas.width)p.x=0;if(p.x<0)p.x=canvas.width;if(p.y>canvas.height)p.y=0;if(p.y<0)p.y=canvas.height;}}
+setInterval(draw,33);
+
+/* ---------------- BUBBLES ---------------- */
+setInterval(()=>{const b=document.createElement('div');b.className='bubble';b.style.left=Math.random()*100+'vw';document.body.appendChild(b);setTimeout(()=>b.remove(),6000);},600);
+
+/* ---------------- MENU ---------------- */
+const menuBtn=document.getElementById('menuBtn'),menuPanel=document.getElementById('menuPanel');
+menuBtn.onclick=()=>{menuPanel.style.display=menuPanel.style.display==='block'?'none':'block';};
+let muted=false,cyberOn=true;
+function toggleMute(){muted=!muted;}
+function toggleTheme(){document.body.classList.toggle('light');}
+function toggleCyber(){cyberOn=!cyberOn;canvas.style.display=cyberOn?'block':'none';}
+
+/* ---------------- SCAN ---------------- */
+function startScan(){alert("Premium QR Scan animation + realtime expiry check placeholder.");if(!muted)document.getElementById('beep').play();}
+function scanGallery(){alert("Select QR image from Gallery to scan.");}
+
+/* ---------------- CHANGE LOG ---------------- */
+function showChangeLog(){alert("PJ-ECC Update Log:\n- Premium QR animation\n- Cyber dashboard\n- Admin panel enhancements");}
+
+/* ---------------- SECURITY HARDENING ---------------- */
+document.onkeydown=e=>{if(e.key==="F12"|| (e.ctrlKey&&e.shiftKey)) e.preventDefault();};
+
+/* ---------------- MOCK TOKEN EXPIRE LOGIC ---------------- */
+function verifyToken(token){let data={name:"Employee A",purpose:"ENTRY",expiry:Date.now()+3600000};return data;}
+
+/* ---------------- INSTALL UPDATE MOCK ---------------- */
+const updateBox=document.getElementById('updateBox'),updateMsg=document.getElementById('updateMsg'),updateBtn=document.getElementById('updateBtn');
+function showUpdate(msg){updateMsg.textContent=msg;updateBox.style.display='flex';}
+updateBtn.onclick=()=>{updateBtn.textContent='Installing...';setTimeout(()=>{updateBox.style.display='none';alert('Updated Successfully!');updateBtn.textContent='Update';},2000);}
+</script>
+</body>
+</html>
